@@ -1,6 +1,9 @@
 package com.overstar.es.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * @Description
@@ -8,9 +11,13 @@ import lombok.Data;
  * @Date 2019/9/9 16:07
  */
 @Data
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductDocument {
-    private String productName;
-    private String viewSpot;
-    private String introduce;
-    private String constantId;
+    private int productId;
+    private String productNameZh;
+    private String productNameEn;
+    private String viewSpotName;
+    private String tagName;
 }

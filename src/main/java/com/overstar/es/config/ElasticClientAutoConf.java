@@ -3,13 +3,12 @@ package com.overstar.es.config;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.XPackClient;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 /**
  * @Description
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Component;
  */
 @Configuration
 @Slf4j
-public class ElasticClientAutoConf {
+public class ElasticClientAutoConf implements FactoryBean<RestHighLevelClient> , InitializingBean, DisposableBean {
 
     @Value("${es.host}")
     private String esHost;
@@ -26,12 +25,38 @@ public class ElasticClientAutoConf {
     @Value("${es.port}")
     private int esPort;
 
-    @Bean(destroyMethod = "close")
-    public RestHighLevelClient initClient(){
-        log.info("host地址={}，端口={}",esHost,esPort);
-        RestClientBuilder builder = RestClient.builder(new HttpHost(esHost, esPort));
+    private RestHighLevelClient client;
 
-        RestHighLevelClient levelClient = new RestHighLevelClient(builder);
-        return levelClient;
+    @Override
+    public void destroy() throws Exception {
+        try {
+            log.info("try to close els-client ...");
+            client.close();
+            log.info("close els-client successfully");
+        }catch (Throwable e){
+            log.error("close els-client failure");
+        }
     }
+
+    @Override
+    public RestHighLevelClient  getObject() throws Exception {
+        return client;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return RestHighLevelClient.class;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        log.info("create elasticsearch restHeightLevel client...");
+        buildClient();
+    }
+
+
+    protected void buildClient()  {
+        client = new RestHighLevelClient(RestClient.builder(new HttpHost(esHost,esPort)));
+    }
+
 }
