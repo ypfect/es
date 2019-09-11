@@ -2,6 +2,9 @@ package com.overstar.es.web;
 
 import com.overstar.es.domain.ProductDocument;
 import com.overstar.es.mapper.ProductDocumentMapper;
+import com.overstar.es.pop.EsPop;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -28,13 +31,22 @@ public class HelloController {
     private RestHighLevelClient client;
     @Autowired
     private ProductDocumentMapper mapper;
+    @Autowired
+    private EsPop pop;
 
 
     @RequestMapping("/create/{index}")
-    public String getHealthy(@PathVariable String index) throws IOException {
+    public String create(@PathVariable String index) throws IOException {
         CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);
         CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
         return createIndexResponse.toString();
+    }
+
+    @RequestMapping("/delete/{index}")
+    public String delete(@PathVariable String index) throws IOException {
+        DeleteIndexRequest createIndexRequest = new DeleteIndexRequest(index);
+        AcknowledgedResponse delete = client.indices().delete(createIndexRequest, RequestOptions.DEFAULT);
+        return delete.toString()+delete.remoteAddress();
     }
 
 
@@ -45,5 +57,10 @@ public class HelloController {
         map.put("size",10);
         List<ProductDocument> docSource = mapper.getProductDocSource(map);
         return docSource.toString();
+    }
+
+    @RequestMapping("/conf")
+    public String conf() {
+        return pop.getIndex().getIndexName();
     }
 }

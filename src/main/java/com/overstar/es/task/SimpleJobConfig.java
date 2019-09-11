@@ -36,10 +36,7 @@ public class SimpleJobConfig {
     
     @Resource
     private ZookeeperRegistryCenter regCenter;
-    
-//    @Resource
-//    private JobEventConfiguration jobEventConfiguration;
-    
+
     @Bean
     public SimpleJob simpleJob() {
         return new SpringSimpleJob();
