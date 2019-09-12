@@ -1,6 +1,7 @@
 package com.overstar.es.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,13 +27,15 @@ public  abstract class AbstractIndexService  implements IndexService{
     private RestHighLevelClient client;
 
     @Override
-    public void index() {
+    public void index() throws IllegalAccessException {
+        //先准备数据
+        Object datas = getData();
         if (!createIndex()) {
             log.error("创建索引失败了！类型={}",taskType());
             return;
         }
-        Object datas = getData();
-        Object objects = dataPrepare(datas);
+
+        List<IndexRequest> objects = dataPrepare(datas);
         boolean indexing = indexing(objects);
         deleteIndex();
         if (indexing) log.info("类型={}，indexing successfully",taskType());
@@ -41,7 +44,7 @@ public  abstract class AbstractIndexService  implements IndexService{
 
     abstract String taskType();
     abstract Object getData();
-    abstract Object dataPrepare(Object data);
+    abstract List<IndexRequest> dataPrepare(Object data) throws IllegalAccessException;
     abstract boolean createIndex();
     abstract boolean indexing(Object tem);
     abstract boolean deleteIndex();

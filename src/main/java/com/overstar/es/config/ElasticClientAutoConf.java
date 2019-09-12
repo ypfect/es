@@ -1,5 +1,6 @@
 package com.overstar.es.config;
 
+import com.overstar.es.pop.EsPop;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -13,6 +14,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,8 +27,9 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class ElasticClientAutoConf implements FactoryBean<RestHighLevelClient> , InitializingBean, DisposableBean {
 
-    private static final String ES_USER_NAME = "elastic";
-    private static final String ES_PWD = "changeme";
+    @Autowired
+    private EsPop esPop;
+
     @Value("${es.host}")
     private String esHost;
 
@@ -59,7 +62,6 @@ public class ElasticClientAutoConf implements FactoryBean<RestHighLevelClient> ,
     @Override
     public void afterPropertiesSet() throws Exception {
         log.info("create elasticsearch restHeightLevel client...");
-//        buildClient();
         buildClientXPack();
     }
 
@@ -68,7 +70,7 @@ public class ElasticClientAutoConf implements FactoryBean<RestHighLevelClient> ,
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
                 //es账号密码
-                new UsernamePasswordCredentials(ES_USER_NAME, ES_PWD));
+                new UsernamePasswordCredentials(esPop.getXPackSecurityProperties().getUsername(), esPop.getXPackSecurityProperties().getPassword()));
         try {
             client = new RestHighLevelClient(
                     //传入RestClientBuilder
@@ -87,11 +89,6 @@ public class ElasticClientAutoConf implements FactoryBean<RestHighLevelClient> ,
             //示例方法，不处理异常
             e.printStackTrace();
         }
-    }
-
-
-    protected void buildClient()  {
-        client = new RestHighLevelClient(RestClient.builder(new HttpHost(esHost,esPort)));
     }
 
 }
