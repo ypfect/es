@@ -2,11 +2,8 @@ package com.overstar.es.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Description
@@ -22,9 +19,6 @@ import java.util.Map;
  */
 @Slf4j
 public  abstract class AbstractIndexService  implements IndexService{
-
-    @Autowired
-    private RestHighLevelClient client;
 
     @Override
     public void index() throws IllegalAccessException {
@@ -48,12 +42,5 @@ public  abstract class AbstractIndexService  implements IndexService{
     abstract boolean createIndex();
     abstract boolean indexing(Object tem);
     abstract boolean deleteIndex();
-
-
-
-    public void converOldByAlias(String alias, List<Map<String,String>> inputData){
-//        client.
-    }
-
 
 }

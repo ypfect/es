@@ -82,7 +82,7 @@ public class ElasticClientAutoConf implements FactoryBean<RestHighLevelClient> ,
                             httpClientBuilder.disableAuthCaching();
                             return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
                         }
-                    }).setMaxRetryTimeoutMillis(2000)
+                    }).setMaxRetryTimeoutMillis(6000)
             );
         }catch (Exception e)
         {

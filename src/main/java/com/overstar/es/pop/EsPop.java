@@ -17,5 +17,6 @@ public class EsPop {
      */
     private IndexProperties index = new IndexProperties();
     private XPackSecurityProperties xPackSecurityProperties = new XPackSecurityProperties();
+    private AliasProperties aliasProperties = new AliasProperties();
 
 }
