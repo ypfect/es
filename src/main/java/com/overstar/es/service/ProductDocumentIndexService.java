@@ -13,6 +13,7 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -29,6 +30,7 @@ import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -186,33 +188,22 @@ public class ProductDocumentIndexService extends AbstractIndexService {
         }
 
         DeleteIndexRequest delIndex = new DeleteIndexRequest();
-        delIndex.indices(Arrays.toString(oldIndies.toArray()));
+        delIndex.indices(String.join(",",oldIndies));
+        try {
+            client.indices().deleteAsync(delIndex, RequestOptions.DEFAULT, new ActionListener<AcknowledgedResponse>() {
+                @Override
+                public void onResponse(AcknowledgedResponse acknowledgedResponse) {
+                    log.info("删除成功！别名=【{}】,删除索引【{}】","product",oldIndies);
+                }
 
-        oldIndies.forEach(s -> {
-            try {
-                client.indices().delete(new DeleteIndexRequest(s),RequestOptions.DEFAULT);
-                log.info("shanchu成功+{}",s);
-            } catch (IOException e) {
-                log.error("shanchu失败+{}",s);
-                e.printStackTrace();
-            }
-
-        });
-//        try {
-//            client.indices().deleteAsync(delIndex, RequestOptions.DEFAULT, new ActionListener<AcknowledgedResponse>() {
-//                @Override
-//                public void onResponse(AcknowledgedResponse acknowledgedResponse) {
-//                    log.info("删除成功！别名=【{}】,删除索引【{}】","product",oldIndies);
-//                }
-//
-//                @Override
-//                public void onFailure(Exception e) {
-//                    log.error("删除失败！别名=【{}】,删除索引【{}】","product",oldIndies);
-//                }
-//            });
-//        }catch (Exception e){
-//            log.error("删除失败！别名=【{}】,删除索引【{}】","product",oldIndies);
-//        }
+                @Override
+                public void onFailure(Exception e) {
+                    log.error("删除失败！别名=【{}】,删除索引【{}】","product",oldIndies);
+                }
+            });
+        }catch (Exception e){
+            log.error("异步删除索引异常！别名=【{}】,删除索引【{}】","product",oldIndies);
+        }
 
         return true;
 
