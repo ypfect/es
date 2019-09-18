@@ -1,4 +1,4 @@
-package com.overstar.es.service.vo;
+package com.overstar.es.vo;
 
 import com.overstar.es.constants.EnumOrderType;
 import lombok.Data;

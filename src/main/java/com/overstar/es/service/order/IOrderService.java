@@ -1,7 +1,7 @@
 package com.overstar.es.service.order;
 
 import com.overstar.es.constants.EnumOrderType;
-import com.overstar.es.service.vo.OrderCreateParamBase;
+import com.overstar.es.vo.OrderCreateParamBase;
 
 /**
  * @Description

@@ -1,6 +1,8 @@
 package com.overstar.es.web;
 
-import com.overstar.es.vo.OrderCreateParam;
+import com.overstar.es.service.order.OrderFactory;
+import com.overstar.es.vo.StarOrderCreateParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,9 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
 
 
-    @RequestMapping("/create")
-    public int orderCreat(OrderCreateParam orderCreateParam){
+    @Autowired
+    private OrderFactory orderFactory;
 
+    @RequestMapping("/create")
+    public int orderCreat(StarOrderCreateParam orderCreateParam){
+        orderFactory.create(orderCreateParam);
         return 10001;
     }
 }

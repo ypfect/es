@@ -1,4 +1,4 @@
-package com.overstar.es.service.vo;
+package com.overstar.es.vo;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.overstar.es.service.vo;
+package com.overstar.es.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -33,7 +33,6 @@ public class StarOrderDetail implements Serializable, Cloneable{
     private String skuModel;//商品型号
     private String skuType;//商品类型
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private  Long serviceItemId;//服务单详情id
     private String settleState;//结算状态
     private Long settleCode;//结算单号
     private BigDecimal purchasePrice;//采购价格

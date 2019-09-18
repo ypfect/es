@@ -1,4 +1,4 @@
-package com.overstar.es.service.vo;
+package com.overstar.es.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,7 +19,7 @@ public class OrderBase implements Serializable, Cloneable{
     private Long id;
     private Date finishTime;//订单完成时间
     private String orderCode;//订单编码
-    private String orderSrc;//订单来源(0导购端，1用户端)
+    private String orderFrom;//订单来源(0导购端，1用户端)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long supplierId;//供应商id
     private Integer storeAreaId;//仓库id
@@ -42,7 +42,7 @@ public class OrderBase implements Serializable, Cloneable{
     private String getTime;//取货时间(自提、配送时间)
     private Date createTime;//创建时间
     private String payType;//支付类型(0-支付宝  1-微信)
-    private String payState;//支付状态(1-未完成  2-已完成)
+    private String payStatus;//支付状态(1-未完成  2-已完成)
     private String payMode;//支付方式(1-在线支付, 2-线下支付, 7-扫码支付)
     private Date payTime;//支付时间
     private String transactionId;//支付流水号
@@ -52,7 +52,6 @@ public class OrderBase implements Serializable, Cloneable{
     private Date cancelTime;//取消状态
     private Date refundApplyTime;//退款申请时间
     private String returnState;//退货状态（1：等待卖家确认; 2:卖家不同意退货；3：卖家同意退货；4：买家发货；5-卖家确认收货；6-强制取消;7-撤销申请）
-    private Long storeMark;//依据此long类型数字查询仓库信息
     private String settleFlag;//结算标志(0-未结算，1-用户不需要发票结算，2-用户需要发票结算)
     private Long settleCode;//结算编号
     private String userDawInvoiceFlag;//是否开了发票(0-没开， 1-开了)
