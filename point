@@ -124,3 +124,5 @@
 	}
 }
 
+@Value("#{'${travel.product.categories}'.split(',')}")
+	private List<Integer> categories;
