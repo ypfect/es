@@ -1,10 +1,13 @@
 package com.overstar.es.service;
 
 import com.google.common.collect.Lists;
+import com.overstar.es.constants.EnumErrorCode;
 import com.overstar.es.constants.EnumIndexType;
 import com.overstar.es.domain.ProductDocument;
+import com.overstar.es.exception.IndexException;
 import com.overstar.es.mapper.ProductDocumentMapper;
 import com.overstar.es.pop.EsPop;
+import com.overstar.es.utils.BeanUtils;
 import com.overstar.es.utils.IndexUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.ActionListener;
@@ -26,11 +29,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -50,6 +51,7 @@ public class ProductDocumentIndexService extends AbstractIndexService {
     @Autowired
     private IndexUtil indexUtil;
     private List<String> oldIndies;
+    private String indexNameNow;
 
 
     @Override
@@ -83,61 +85,40 @@ public class ProductDocumentIndexService extends AbstractIndexService {
 
 
     @Override
-    List<IndexRequest> dataPrepare(Object data) throws IllegalAccessException {
+    List<IndexRequest> dataPrepare(Object data) {
         List<ProductDocument> documents = (List<ProductDocument>) data;
         ArrayList<IndexRequest> requests = new ArrayList<>();
         for (ProductDocument document : documents) {
-            HashMap<String, Object> map = new HashMap<>();
-            Field[] fields = document.getClass().getDeclaredFields();
-            for (int i = 0; i < fields.length; i++) {
-                Field field = fields[i];
-                field.setAccessible(true);
-                Object fieldValue = field.get(document);
-                if (fieldValue instanceof String) {
-                    String o = (String) field.get(document);
-                    if (!StringUtils.isEmpty(o)) {
-                        String[] split = o.split(",");
-                        if (split.length > 0) {
-                            map.put(field.getName(), split);
-                        }
-                    }
-
-                    if (CollectionUtils.isEmpty(map)) continue;
-                    IndexRequest request = new IndexRequest();
-                    request.id(String.valueOf(document.getProductId()));
-                    request.index(generatorIndexName());
-                    request.source(map);
-                    request.type("_doc");
-
-                    requests.add(request);
-                }
-
+            Map<String, Object> bean2Map = BeanUtils.bean2Map(document);
+            IndexRequest request = new IndexRequest();
+            request.id(String.valueOf(document.getProductId()));
+            if (StringUtils.isEmpty(indexNameNow)){
+                throw new IndexException("生成新的索引名称为空....", EnumErrorCode.INDEX_ERROR.getCode());
             }
-
+            request.index(indexNameNow);
+            request.source(bean2Map);
+            request.type("_doc");
+            requests.add(request);
         }
-
         return requests;
     }
 
     @Override
     public boolean createIndex() {
         String indexName = generatorIndexName();
+        indexNameNow = indexName;
         CreateIndexRequest request = new CreateIndexRequest(indexName);
         // 2、设置索引的settings
         request.settings(esPop.getIndex().getSettings(), XContentType.JSON);
         request.mapping(esPop.getIndex().getMappings(), XContentType.JSON);
 
-        Set<Alias> aliases = request.aliases();
-        aliases.forEach(alias1 -> {
-            String name = alias1.name();
-            System.out.println(name);
-        });
         Alias alias = new Alias(esPop.getAliasProperties().getProductAlias());
         request.alias(alias);
 
         try {
             //别名下的老索引名称
             oldIndies = indexUtil.getIndicesByAlias(esPop.getAliasProperties().getProductAlias());
+            log.info("老索引名称={}",oldIndies);
             CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
             boolean acknowledged = createIndexResponse.isAcknowledged();
             if (acknowledged) {
@@ -150,9 +131,6 @@ public class ProductDocumentIndexService extends AbstractIndexService {
 
         return false;
     }
-
-
-
 
 
     @Override
@@ -169,11 +147,12 @@ public class ProductDocumentIndexService extends AbstractIndexService {
             client.bulkAsync(bulkRequest, RequestOptions.DEFAULT, new ActionListener<BulkResponse>() {
                 @Override
                 public void onResponse(BulkResponse bulkItemResponses) {
-                    log.info("bulking 【{}】 success a piece",taskType());
+                    log.info("bulking 【{}】 success a piece", taskType());
                 }
+
                 @Override
                 public void onFailure(Exception e) {
-                    log.info("bulking 【{}】 Failure a piece",taskType());
+                    log.info("bulking 【{}】 Failure a piece", taskType());
                 }
             });
         });
@@ -183,26 +162,26 @@ public class ProductDocumentIndexService extends AbstractIndexService {
 
     @Override
     boolean deleteIndex() {
-        if (CollectionUtils.isEmpty(oldIndies)){
+        if (CollectionUtils.isEmpty(oldIndies)) {
             return true;
         }
 
         DeleteIndexRequest delIndex = new DeleteIndexRequest();
-        delIndex.indices(String.join(",",oldIndies));
+        delIndex.indices(String.join(",", oldIndies));
         try {
             client.indices().deleteAsync(delIndex, RequestOptions.DEFAULT, new ActionListener<AcknowledgedResponse>() {
                 @Override
                 public void onResponse(AcknowledgedResponse acknowledgedResponse) {
-                    log.info("删除成功！别名=【{}】,删除索引【{}】","product",oldIndies);
+                    log.info("删除成功！别名=【{}】,删除索引【{}】", "product", oldIndies);
                 }
 
                 @Override
                 public void onFailure(Exception e) {
-                    log.error("删除失败！别名=【{}】,删除索引【{}】","product",oldIndies);
+                    log.error("删除失败！别名=【{}】,删除索引【{}】", "product", oldIndies);
                 }
             });
-        }catch (Exception e){
-            log.error("异步删除索引异常！别名=【{}】,删除索引【{}】","product",oldIndies);
+        } catch (Exception e) {
+            log.error("异步删除索引异常！别名=【{}】,删除索引【{}】", "product", oldIndies);
         }
 
         return true;
