@@ -42,6 +42,7 @@
     <orderEntry type="library" name="Maven: org.elasticsearch.client:transport:6.4.3" level="project" />
     <orderEntry type="library" name="Maven: org.elasticsearch.plugin:reindex-client:6.4.3" level="project" />
     <orderEntry type="library" name="Maven: org.elasticsearch.plugin:percolator-client:6.4.3" level="project" />
+    <orderEntry type="library" name="Maven: com.overstar:order-export:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-web:2.1.8.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.1.8.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.1.8.RELEASE" level="project" />
